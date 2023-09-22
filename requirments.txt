@@ -3,7 +3,6 @@ numpy
 pandas
 random
 os
-tqdm
 train_test_split
 matplotlib
 surprise
