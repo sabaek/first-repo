@@ -1,7 +1,6 @@
 streamlit
 numpy
 pandas
-tqdm
 random
 os
 train_test_split
