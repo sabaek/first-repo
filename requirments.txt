@@ -10,4 +10,4 @@ collections
 wordcloud
 konlpy
 transformers
-sklearn
+scikit-learn
