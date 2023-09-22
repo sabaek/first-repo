@@ -3,7 +3,6 @@ import pandas as pd
 import numpy as np
 import random
 import os
-import sklearn
 from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
 from surprise import Dataset, Reader, SVD, accuracy
