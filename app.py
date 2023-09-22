@@ -6,7 +6,7 @@ import os
 from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
 from surprise import Dataset, Reader, SVD, accuracy
-from collections import defaultdict
+from collections import defaultdict, Counter
 import wordcloud
 from konlpy.tag import Okt
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
@@ -19,7 +19,7 @@ def reset_seeds(seed):
 SEED = 42
 reset_seeds(SEED)
 
-df = pd.read_csv('C:/Users/INTEL WIN11PRO(12TH)/Documents/서산데/파이널/data/아모레크롤링_스킨케어(1).csv')
+df = pd.read_csv("아모레크롤링_스킨케어.csv")
 
 # 제품별 평균 평점과 리뷰 수 계산
 product_rating_avg = df.groupby('상품명')['별점'].mean()
@@ -205,6 +205,31 @@ def chatbot_with_recommendation(df, selected_title):
     
     return summary, product_info
 
+@st.cache(allow_output_mutation=True)
+def get_new_df(df):
+    keywords = ['지성', '수부지', '건성', '복합성', '민감성','수분','순하','촉촉','트러블','예민','보습','산뜻','쫀쫀','주름','진정','각질','여드름', '잡티', '기미', '피부톤', '탄력', '피지', '모공', '블랙헤드']
+    new_df = pd.DataFrame(columns=['상품명', '키워드'])
+    index = 0
+    okt = Okt()
+    for product in df['상품명'].unique():
+        texts = df[df['상품명'] == product]['리뷰'].to_list()
+        nouns_list = []
+        for text in texts:
+            nouns = okt.nouns(text)
+            nouns_list.extend(nouns)
+        count = Counter(nouns_list)
+        noun_list = count.most_common()
+        #기존엔 most_common(100)으로 했으나 전체 상품을 하니 키워드가 없는 제품들이 있어 수정
+        category = df[df['상품명'] == product]['상품분류'].iloc[0]
+
+        median_freq = np.median([freq for word, freq in noun_list])
+        filtered_noun_list = [(word, freq) for word, freq in noun_list if freq >= median_freq]
+        matching_keywords = [word for word, freq in filtered_noun_list if word in keywords]
+        matching_keywords_str = ', '.join(matching_keywords)
+        new_df.loc[index] = [product, matching_keywords_str]
+        index += 1
+    return new_df
+
 st.sidebar.title('Cosmetic Recommend')
 st.sidebar.header('추천받고 싶은 유형을 선택하세요')
 if st.sidebar.checkbox("상품명 입력"):
@@ -228,6 +253,33 @@ if st.sidebar.checkbox("상품명 입력"):
             st.subheader(f"{selected_title}의 전체 리뷰 요약:")
             st.write(summary)
             st.write(product_info)
+        
+        # 비슷한 상품 보기 선택
+        if st.checkbox("비슷한 상품을 보여드릴까요?"):
+            new_df = pd.read_csv("new_df.csv")
+            input_keywords_str = new_df[new_df['상품명'] == selected_title]['키워드'].iloc[0]
+            if not isinstance(input_keywords_str, str):
+                input_keywords_str = ""
+            
+            input_keywords = input_keywords_str.split(", ")
+            similar_products = {}
+            for _, row in new_df.iterrows():
+                product = row['상품명']
+                keywords_str = row['키워드']
+                if product == selected_title:
+                    continue
+                if not isinstance(keywords_str, str):
+                    keywords_str = ""
+                keywords = keywords_str.split(", ")
+                matching_keywords = set(input_keywords).intersection(set(keywords))
+                if matching_keywords:
+                    similar_products[product] = [keyword for keyword in matching_keywords]
+            
+            sorted_similar_products = sorted(similar_products.items(), key=lambda x: len(x[1]), reverse=True)[:5]
+            st.subheader(f"{selected_title}과 비슷한 제품:")
+            for product, matching_keywords in sorted_similar_products:
+                matching_keywords_str = ', '.join(matching_keywords)
+                st.text(f"{product} (일치하는 키워드: {matching_keywords_str})")
 
 
 if st.sidebar.checkbox("고객타입 입력"):
