@@ -10,5 +10,4 @@ collections
 wordcloud
 konlpy
 transformers
-scikit-learn
-sklearn.model_selection
+sklearn
