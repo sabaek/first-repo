@@ -3,7 +3,7 @@ numpy
 pandas
 scikit-learn
 scikit-surprise
-transformers==4.3.2
+transformers
 konlpy
 matplotlib
 wordcloud
