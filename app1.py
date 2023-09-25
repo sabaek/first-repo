@@ -20,7 +20,7 @@ def reset_seeds(seed):
 SEED = 42
 reset_seeds(SEED)
 
-df = pd.read_csv("아모레크롤링_스킨케어.csv")
+df = pd.read_csv("아모레크롤링_스킨케어 (1).csv")
 
 # 제품별 평균 평점과 리뷰 수 계산
 product_rating_avg = df.groupby('상품명')['별점'].mean()
@@ -221,7 +221,8 @@ def generate_wordcloud(texts):
         words.extend(nouns)
     
     # 워드클라우드 생성
-    wc = wordcloud.WordCloud(font_path='C:\Windows\Fonts\malgun.ttf', background_color='white', width=800, height=400)
+    # wc = wordcloud.WordCloud(font_path='C:\Windows\Fonts\malgun.ttf', background_color='white', width=800, height=400)
+    wc = wordcloud.WordCloud(font_path='./malgun.ttf', background_color='white', width=800, height=400)
     wc.generate(' '.join(words))
     
     return wc
