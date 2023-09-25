@@ -287,13 +287,15 @@ if st.sidebar.checkbox("고객타입 입력"):
     age = st.sidebar.selectbox("나이",["10대","20대","30대","40대","50대 이상"])
     skintype = st.sidebar.selectbox("피부타입",["복합성","건성","수분부족지성","지성","중성","극건성"])
     skintrouble = st.sidebar.selectbox("피부트러블",["민감성","건조함","탄력없음","트러블","주름","모공","칙칙함","복합성"])
+    sub_category = st.sidebar.selectbox("상품소분류", df['상품소분류'].unique())
     
     if 'recommend_list' not in st.session_state:
         st.session_state['recommend_list'] = []
 
     if st.sidebar.button("추천받기"):
         st.header(f"{gender}, {age}, {skintype}, {skintrouble} 타입 고객님께 추천하는 제품입니다.")
-        recommend_list = recommend_products_for_user(age, gender, skintype, skintrouble)
+        filtered_df = df[df['상품소분류'] == sub_category]
+        recommend_list = recommend_products_for_user(age, gender, skintype, skintrouble,df=filtered_df)
         st.session_state['recommend_list'] = recommend_list
         for rec in st.session_state['recommend_list']:
             st.write(rec)
