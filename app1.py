@@ -80,8 +80,47 @@ rmse = accuracy.rmse(predictions)
 id_to_user = {v: k for k, v in user_to_id.items()}
 id_to_product = {v: k for k, v in product_to_id.items()}
 
-def get_top_n_recommendations(predictions, n=5):
+#def get_top_n_recommendations(predictions, n=5):
+#    top_n = {}
+
+#    for uid, iid, true_r, est, _ in predictions:
+#        user_info = id_to_user[uid]
+#        product_name = id_to_product[iid]
+
+#        if user_info not in top_n:
+#            top_n[user_info] = []
+
+#        top_n[user_info].append((product_name, est))
+
+    # 정렬, 중복 제거
+#    for user_info, user_ratings in top_n.items():
+#        user_ratings.sort(key=lambda x: x[1], reverse=True)
+#        seen = set()
+#        top_n_without_duplicates = []
+#        for product_name, est in user_ratings:
+#            if product_name not in seen:
+#                seen.add(product_name)
+#                top_n_without_duplicates.append((product_name, est))
+
+#        top_n[user_info] = top_n_without_duplicates[:n]
+
+#    return top_n
+
+def get_top_n_recommendations(df, n=5):
     top_n = {}
+    train_df, test_df = train_test_split(df,test_size=0.2,random_state=SEED,stratify=df['구매_클래스'])
+    reader = Reader(rating_scale=(0, 5))
+    train_data_surprise = Dataset.load_from_df(train_df[['user_id', 'product_id', '가중평점']], reader)
+    trainset = train_data_surprise.build_full_trainset()
+
+    testset = [(row['user_id'], row['product_id'], row['가중평점']) for i, row in test_df.iterrows()]
+
+    best_params = {'n_epochs': 100, 'lr_all': 0.005, 'reg_all': 0.2}
+    
+    model = SVD(n_epochs=best_params['n_epochs'], lr_all=best_params['lr_all'], reg_all=best_params['reg_all'],random_state=SEED)
+    model.fit(trainset)
+
+    predictions = model.test(testset)
 
     for uid, iid, true_r, est, _ in predictions:
         user_info = id_to_user[uid]
@@ -115,7 +154,7 @@ def get_unrated_items(user, df):
     unrated_items = all_items - rated_items
     return unrated_items
 
-user_recommendations_with_rated = get_top_n_recommendations(predictions, n=5)
+# user_recommendations_with_rated = get_top_n_recommendations(predictions, n=5)
 
 def content_based_recommendation_with_weights(age, gender, skin_type, skin_trouble, top_n=5, weight=0.1):
     # 사용자 정보와 일치하는 리뷰 데이터 필터링
