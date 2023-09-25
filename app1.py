@@ -20,7 +20,7 @@ def reset_seeds(seed):
 SEED = 42
 reset_seeds(SEED)
 
-df = pd.read_csv("아모레크롤링_스킨케어 (1).csv")
+df = pd.read_csv("아모레크롤링_스킨케어.csv")
 
 # 제품별 평균 평점과 리뷰 수 계산
 product_rating_avg = df.groupby('상품명')['별점'].mean()
