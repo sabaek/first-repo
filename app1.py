@@ -314,7 +314,7 @@ if st.sidebar.checkbox("고객타입 입력"):
         review_trend['리뷰작성날짜'] = review_trend['리뷰작성날짜'].dt.to_timestamp()
         # 그래프로 표현
         plt.figure(figsize=(10, 6))
-        plt.plot(review_trend['리뷰작성날짜'], review_trend['리뷰수'], marker='o')
+        plt.bar(review_trend['리뷰작성날짜'], review_trend['리뷰수'], width=20, linewidth=2)
         plt.title('review trend')
         plt.xlabel('date of review')
         plt.ylabel('number of review')
